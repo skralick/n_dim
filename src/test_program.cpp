@@ -55,8 +55,8 @@ int main(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
                  g_vertex_buffer_data, GL_STATIC_DRAW);
 
-    GLuint programID = LoadShaders( "common/Vertex.glsl",
-                                    "common/Fragment.glsl" );
+    GLuint programID = LoadShaders( "Vertex.glsl",
+                                    "Fragment.glsl" );
 
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // bg = dark blue
 
