@@ -1,9 +1,11 @@
+#include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
+
+#include <shader.hpp>
 
 #include <stdlib.h>
 #include <stdio.h>
-
-// This was copied from http://www.glfw.org/docs/3.0/quick.html
 
 static void error_callback(int error, const char* description)
 {
@@ -14,6 +16,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
+
+static const GLfloat g_vertex_buffer_data[] = {
+    -1.0f, -1.0f, 0.0f,
+     1.0f, -1.0f, 0.0f,
+     0.0f,  1.0f, 0.f,
+};
+
 int main(void)
 {
     GLFWwindow* window;
@@ -28,28 +37,45 @@ int main(void)
     }
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+	getchar();
+	glfwTerminate();
+	return -1;
+    }
+
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+
+    GLuint vertexbuffer;
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
+                 g_vertex_buffer_data, GL_STATIC_DRAW);
+
+    GLuint programID = LoadShaders( "common/Vertex.glsl",
+                                    "common/Fragment.glsl" );
+
+    glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // bg = dark blue
+
     while (!glfwWindowShouldClose(window))
     {
-        float ratio;
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float) height;
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-        glBegin(GL_TRIANGLES);
-        glColor3f(1.f, 0.f, 0.f);
-        glVertex3f(-0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 1.f, 0.f);
-        glVertex3f(0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 0.f, 1.f);
-        glVertex3f(0.f, 0.6f, 0.f);
-        glEnd();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(programID);
+        glEnableVertexAttribArray(0); // 0th attrib means verticies
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            (void*)0
+        );
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray(0);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
