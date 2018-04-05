@@ -3,7 +3,9 @@ project (n_dims)
 
 find_package(OpenGL REQUIRED)
 
-include_directories(common/)
+include_directories(common/
+                    external/glm-0.9.7.1)
+
 
 # To successfully run this you need to be in the common folder so it can 
 # can find the shaders. Run the following commands to make and run it all

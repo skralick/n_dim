@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 static void error_callback(int error, const char* description)
 {
     fputs(description, stderr);
