@@ -121,6 +121,7 @@ int main(void)
     }
     glEnable(GL_DEPTH_TEST); // use z buffer to only show close fragments
     glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE); // enable backface culling
 
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // bg = dark blue
 
