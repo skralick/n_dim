@@ -11,6 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
+glm::vec3 camera_loc(4.0f, 3.0f, 3.0f);
+
 static void error_callback(int error, const char* description)
 {
     fputs(description, stderr);
@@ -19,6 +21,18 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+        camera_loc.x += 1;
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+        camera_loc.x -= 1;
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+        camera_loc.y += 1;
+    if (key == GLFW_KEY_W && action == GLFW_PRESS)
+        camera_loc.y -= 1;
+    if (key == GLFW_KEY_3 && action == GLFW_PRESS)
+        camera_loc.z += 1;
+    if (key == GLFW_KEY_E && action == GLFW_PRESS)
+        camera_loc.z -= 1;
 }
 
 static const GLfloat g_vertex_buffer_data[] = {
@@ -137,7 +151,7 @@ int main(void)
 
     glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
     glm::mat4 View = glm::lookAt(
-        glm::vec3(4,3,3), // location in world space
+        camera_loc, // location in world space
         glm::vec3(0,0,0), // look at 0 0 0 
         glm::vec3(0,1,0)  // up vector
     );
@@ -163,6 +177,12 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(programID);
 
+        glm::mat4 View = glm::lookAt(
+            camera_loc, // location in world space
+            glm::vec3(0,0,0), // look at 0 0 0 
+            glm::vec3(0,1,0)  // up vector
+        );
+        mvp = Model * Projection * View * Model;
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
         glEnableVertexAttribArray(0); // 0th attrib means verticies
