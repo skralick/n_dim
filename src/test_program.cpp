@@ -28,7 +28,7 @@ static long get_nanos(void) {
 static bool incPressed[6] = { 0 }; // init button state to false
 static bool decPressed[6] = { 0 }; // init button state to false
 static long old_t = get_nanos();
-glm::vec3 camera_loc(0.0f, 0.0f, 6.0f);
+glm::vec3 camera_loc(0.0f, 5.0f, 20.0f);
 
 static void error_callback(int error, const char* description)
 {
@@ -131,7 +131,13 @@ static const GLfloat g_vertex_buffer_data[] = {
     -1.0f, 1.0f, 1.0f,
     1.0f, 1.0f, 1.0f,
     -1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f
+    1.0f,-1.0f, 1.0f,
+    -10.0f, -1.0f, -10.0f,
+     10.0f, -1.0f,  10.0f,
+     10.0f, -1.0f, -10.0f,
+    -10.0f, -1.0f, -10.0f,
+    -10.0f, -1.0f,  10.0f,
+     10.0f, -1.0f,  10.0f,
 };
 static const GLfloat g_color_buffer_data[] = {
     0.583f,  0.771f,  0.014f,
@@ -169,7 +175,13 @@ static const GLfloat g_color_buffer_data[] = {
     0.393f,  0.621f,  0.362f,
     0.673f,  0.211f,  0.457f,
     0.820f,  0.883f,  0.371f,
-    0.982f,  0.099f,  0.879f
+    0.982f,  0.099f,  0.879f,
+    0.5f, 0.5f, 0.5f,
+    0.5f, 0.5f, 0.5f,
+    0.5f, 0.5f, 0.5f,
+    0.5f, 0.5f, 0.5f,
+    0.5f, 0.5f, 0.5f,
+    0.5f, 0.5f, 0.5f,
 };
 
 
@@ -271,7 +283,7 @@ int main(void)
             0,                                // stride
             (void*)0                          // array buffer offset
         );
-        glDrawArrays(GL_TRIANGLES, 0, 3*12);
+        glDrawArrays(GL_TRIANGLES, 0, 3*14);
         glDisableVertexAttribArray(0);
         glfwSwapBuffers(window);
         glfwPollEvents();
