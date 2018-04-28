@@ -7,11 +7,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <iostream> // for cout and endl which we can use for debugging
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <time.h> // for get_nanos
+
 using namespace glm;
 
-glm::vec3 camera_loc(4.0f, 3.0f, 3.0f);
+// The get_nanos function was taken from:  
+//     https://stackoverflow.com/questions/361363/how-to-measure-time-in-milliseconds-using-ansi-c/36095407#36095407
+static long get_nanos(void) {
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    return (long)ts.tv_sec * 1000000000L + ts.tv_nsec;
+}
+
+// State machine for pressed buttons
+static bool incPressed[6] = { 0 }; // init button state to false
+static bool decPressed[6] = { 0 }; // init button state to false
+static long old_t = get_nanos();
+glm::vec3 camera_loc(0.0f, 0.0f, 6.0f);
 
 static void error_callback(int error, const char* description)
 {
@@ -19,20 +36,63 @@ static void error_callback(int error, const char* description)
 }
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    int keys = 6;
+    int upKeys[6] = {
+              GLFW_KEY_1,
+              GLFW_KEY_2,
+              GLFW_KEY_3,
+              GLFW_KEY_4,
+              GLFW_KEY_5,
+              GLFW_KEY_6};
+    int downKeys[6] = {
+              GLFW_KEY_Q,
+              GLFW_KEY_W,
+              GLFW_KEY_E,
+              GLFW_KEY_R,
+              GLFW_KEY_T,
+              GLFW_KEY_Y};
+
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS)
-        camera_loc.x += 1;
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-        camera_loc.x -= 1;
-    if (key == GLFW_KEY_2 && action == GLFW_PRESS)
-        camera_loc.y += 1;
-    if (key == GLFW_KEY_W && action == GLFW_PRESS)
-        camera_loc.y -= 1;
-    if (key == GLFW_KEY_3 && action == GLFW_PRESS)
-        camera_loc.z += 1;
-    if (key == GLFW_KEY_E && action == GLFW_PRESS)
-        camera_loc.z -= 1;
+
+    for (int i=0; i < keys; i++){
+        if (key == upKeys[i] && action == GLFW_PRESS){
+            incPressed[i] = true;
+        }
+        if (key == upKeys[i] && action == GLFW_RELEASE){
+            incPressed[i] = false;
+        }
+        if (key == downKeys[i] && action == GLFW_PRESS){
+            decPressed[i] = true;
+        }
+        if (key == downKeys[i] && action == GLFW_RELEASE){
+            decPressed[i] = false;
+        }
+    }
+}
+static void recalcCameraLoc(long dt){
+    // first and only movement mode - fps style(hold key for constant velocity
+    float unitsPerSec = 8;
+    float distance = dt / 1000000000.0f * unitsPerSec;
+    if (incPressed[0] == true){
+        camera_loc.x += distance;
+    }
+    if (incPressed[1] == true){
+        camera_loc.y += distance;
+    }
+    if (incPressed[2] == true){
+        camera_loc.z += distance;
+    }
+    if (decPressed[0] == true){
+        camera_loc.x -= distance;
+    }
+    if (decPressed[1] == true){
+        camera_loc.y -= distance;
+    }
+    if (decPressed[2] == true){
+        camera_loc.z -= distance;
+    }
+    // Todo: add other movement modes like velocity control in an air plane
 }
 
 static const GLfloat g_vertex_buffer_data[] = {
@@ -176,6 +236,12 @@ int main(void)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(programID);
+
+        long t = get_nanos();
+        long dt = t - old_t;
+        old_t = t;
+
+        recalcCameraLoc(dt);
 
         glm::mat4 View = glm::lookAt(
             camera_loc, // location in world space
