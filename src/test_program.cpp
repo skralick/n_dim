@@ -30,6 +30,9 @@ static bool decPressed[6] = { 0 }; // init button state to false
 static long old_t = get_nanos();
 glm::vec3 camera_loc(0.0f, 5.0f, 20.0f);
 
+typedef enum navState {CONSTANT_V, SET_STEPS} NavState;
+NavState navigation_state = CONSTANT_V;
+
 static void error_callback(int error, const char* description)
 {
     fputs(description, stderr);
@@ -69,30 +72,48 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             decPressed[i] = false;
         }
     }
+    if (navigation_state == SET_STEPS){
+        for (int i = 0; i < 3; i++){
+            if (key == upKeys[i] && action == GLFW_PRESS){
+                camera_loc[i] += 1.0;
+            }
+            if (key == downKeys[i] && action == GLFW_PRESS){
+                camera_loc[i] -= 1.0;
+            }
+        }
+        if (key == GLFW_KEY_N && action == GLFW_PRESS){
+            navigation_state = CONSTANT_V;
+        }
+    }else{
+        if (key == GLFW_KEY_N && action == GLFW_PRESS){
+            navigation_state = SET_STEPS;
+        }
+    }
 }
 static void recalcCameraLoc(long dt){
-    // first and only movement mode - fps style(hold key for constant velocity
-    float unitsPerSec = 8;
-    float distance = dt / 1000000000.0f * unitsPerSec;
-    if (incPressed[0] == true){
-        camera_loc.x += distance;
+    if (navigation_state == CONSTANT_V){
+        // movement mode - fps style(hold key for constant velocity
+        float unitsPerSec = 8;
+        float distance = dt / 1000000000.0f * unitsPerSec;
+        if (incPressed[0] == true){
+            camera_loc.x += distance;
+        }
+        if (incPressed[1] == true){
+            camera_loc.y += distance;
+        }
+        if (incPressed[2] == true){
+            camera_loc.z += distance;
+        }
+        if (decPressed[0] == true){
+            camera_loc.x -= distance;
+        }
+        if (decPressed[1] == true){
+            camera_loc.y -= distance;
+        }
+        if (decPressed[2] == true){
+            camera_loc.z -= distance;
+        }
     }
-    if (incPressed[1] == true){
-        camera_loc.y += distance;
-    }
-    if (incPressed[2] == true){
-        camera_loc.z += distance;
-    }
-    if (decPressed[0] == true){
-        camera_loc.x -= distance;
-    }
-    if (decPressed[1] == true){
-        camera_loc.y -= distance;
-    }
-    if (decPressed[2] == true){
-        camera_loc.z -= distance;
-    }
-    // Todo: add other movement modes like velocity control in an air plane
 }
 
 static const GLfloat g_vertex_buffer_data[] = {
